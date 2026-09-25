@@ -1,0 +1,29 @@
+# Core ML
+torch>=2.1
+transformers>=4.40
+datasets>=2.19
+sentence-transformers>=2.7
+truecase>=0.0.14   # restores likely capitalization before NER (English only)
+accelerate>=0.30
+seqeval>=1.2.2          # NER span/F1 evaluation
+
+# Knowledge base access
+SPARQLWrapper>=2.0       # Wikidata SPARQL queries
+requests>=2.31
+
+# Data handling
+pandas>=2.2
+numpy>=1.26
+pyyaml>=6.0
+
+# Similarity search for candidate ranking
+faiss-cpu>=1.8; platform_system != "Windows"
+scikit-learn>=1.4        # fallback nearest-neighbor / TF-IDF baseline
+
+# Demo (backend API — frontend is a separate React app in demo/frontend)
+fastapi>=0.111
+uvicorn[standard]>=0.29
+
+# Dev / testing
+pytest>=8.2
+tqdm>=4.66

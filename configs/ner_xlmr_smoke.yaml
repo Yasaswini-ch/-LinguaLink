@@ -1,0 +1,28 @@
+# Tiny local CPU smoke-test config — proves the training loop, eval, and
+# demo wiring work end-to-end. NOT a real model: 1 epoch on a small subset.
+# Use configs/ner_xlmr.yaml (run on Colab GPU) for the real trained model.
+model:
+  base_checkpoint: xlm-roberta-base
+  num_labels: 7
+  max_seq_length: 64
+
+data:
+  dataset: wikiann
+  languages: [en, hi, es, de]
+  train_split: train
+  val_split: validation
+  test_split: test
+
+training:
+  output_dir: models/ner/xlmr-smoke
+  learning_rate: 3.0e-5
+  train_batch_size: 16
+  eval_batch_size: 32
+  num_epochs: 1
+  warmup_ratio: 0.06
+  weight_decay: 0.01
+  eval_strategy: epoch
+  save_strategy: epoch
+  metric_for_best_model: f1
+  early_stopping_patience: 2
+  seed: 42

@@ -1,0 +1,14 @@
+# Shared language set used across all configs/scripts.
+languages:
+  - code: en
+    name: English
+    wikiann_tag: en
+  - code: hi
+    name: Hindi
+    wikiann_tag: hi
+  - code: es
+    name: Spanish
+    wikiann_tag: es
+  - code: de
+    name: German
+    wikiann_tag: de

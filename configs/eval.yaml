@@ -1,0 +1,27 @@
+# Evaluation config — reports NER F1 and Linking Accuracy per language.
+ner:
+  # Evaluates our own fine-tune (WikiAnn test-set F1: en 0.839, hi 0.890,
+  # es 0.914, de 0.883) — NOT the model the demo actually runs at inference
+  # time. The demo uses inference_model_path from configs/ner_xlmr.yaml
+  # (a pretrained Hub checkpoint) because it generalizes far better to
+  # casual/conversational text; our fine-tune scores higher on WikiAnn's
+  # in-domain test set but failed badly out-of-domain (see
+  # configs/ner_xlmr.yaml's `training` section for the full comparison).
+  # This eval config is kept to document that in-domain result, not as a
+  # claim about demo-time accuracy.
+  model_path: models/ner/xlmr-multilingual
+  dataset: wikiann
+  languages: [en, hi, es, de]
+
+linking:
+  # Starter gold set (hand-authored, ~5-6 examples/language covering the
+  # project's core ambiguous entities). Swap in Mewsli-9 for a larger,
+  # production-scale evaluation once the pipeline is validated end-to-end.
+  eval_set_path: data/processed/linking_eval_set.jsonl
+  languages: [en, hi, es, de]
+  linking_config: configs/linking.yaml
+
+output:
+  results_dir: results/
+  save_per_language_csv: true
+  save_combined_table: true

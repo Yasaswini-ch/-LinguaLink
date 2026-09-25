@@ -1,0 +1,46 @@
+# NER fine-tuning config — multilingual XLM-R token classifier over WikiAnn.
+#
+# inference_model_path is what the pipeline/demo actually load at runtime.
+# It defaults to a pretrained Hub checkpoint rather than our own fine-tune's
+# output_dir below — see the note under `training` for why.
+inference_model_path: Davlan/xlm-roberta-base-ner-hrl
+
+model:
+  base_checkpoint: xlm-roberta-base
+  num_labels: 7            # O, B-PER, I-PER, B-ORG, I-ORG, B-LOC, I-LOC
+  max_seq_length: 128
+
+data:
+  dataset: wikiann
+  languages: [en, hi, es, de]
+  train_split: train
+  val_split: validation
+  test_split: test
+  # Hand-labeled casual/conversational examples (English-only for now) mixed
+  # into training to fix a diagnosed failure mode: WikiAnn is pure Wikipedia
+  # prose, so unpunctuated first-person sentences ("I live in Brazil") were
+  # misclassified entirely as ORG. See src/mel/data/casual_augmentation.py.
+  augmentation_path: data/processed/casual_ner_augmentation_en.jsonl
+
+training:
+  # NOTE: the app/demo actually uses inference_model_path below (a pretrained
+  # checkpoint), not this fine-tuned output. Our own fine-tune scored higher
+  # on WikiAnn's test set (F1 0.84-0.91) but failed badly on casual text (see
+  # data/processed/casual_ner_augmentation_en.jsonl and the "I live in
+  # Brazil" diagnostic) — Davlan/xlm-roberta-base-ner-hrl, trained on far
+  # more/broader data, handled every failure case correctly, including
+  # Hindi despite not being in its documented language list. Kept this
+  # training config and the fine-tune results as a documented comparison
+  # rather than deleting them.
+  output_dir: models/ner/xlmr-multilingual
+  learning_rate: 2.0e-5
+  train_batch_size: 16
+  eval_batch_size: 32
+  num_epochs: 5
+  warmup_ratio: 0.06
+  weight_decay: 0.01
+  eval_strategy: epoch
+  save_strategy: epoch
+  metric_for_best_model: f1
+  early_stopping_patience: 2
+  seed: 42

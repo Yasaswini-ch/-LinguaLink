@@ -1,0 +1,21 @@
+# Candidate generation + disambiguation config.
+candidate_generation:
+  kb: wikidata
+  sparql_endpoint: https://query.wikidata.org/sparql
+  local_dump_path: data/kb/wikidata_aliases.parquet   # optional offline cache
+  top_k: 10
+
+disambiguation:
+  # paraphrase-multilingual-mpnet-base-v2 (STS/paraphrase-tuned) beat LaBSE
+  # (translation-pair-tuned) on our worked disambiguation example: LaBSE
+  # ranked "Amazon" (river) above "Amazon" (company) even in a clearly
+  # business context (0.169 vs 0.107); the STS model got both directions
+  # right (0.145 business->company vs 0.043 business->river; 0.558
+  # river->river vs 0.138 river->company). See notebooks/ for the comparison.
+  embedding_model: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+  similarity_metric: cosine
+  context_window_tokens: 20     # tokens of context on each side of the mention
+  nil_threshold: 0.1            # below this similarity -> unlinkable (NIL); recalibrate against eval set
+  reranker:
+    enabled: false
+    model: cross-encoder/mmarco-mMiniLMv2-L12-H384-v1

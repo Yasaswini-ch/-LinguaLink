@@ -1,0 +1,32 @@
+# Manually curated alias overrides, merged into the local KB cache on top of
+# what Wikidata returns. Two real, verified reasons an entry ends up here:
+#
+# 1. Script/spelling variants Wikidata doesn't register as interchangeable
+#    aliases — e.g. Hindi has multiple valid Devanagari spellings for the
+#    same name (conjunct vs. anusvara nasalization) that are NOT the same
+#    raw string, so exact matching against only one cached spelling silently
+#    NILs the other.
+# 2. Genuine Wikidata data gaps — verified via `wbgetentities`, Q1058
+#    (Narendra Modi) has ZERO registered English aliases at all
+#    (`"aliases":{}`), so bare "Modi" cannot be found by ANY live query
+#    strategy (SPARQL or the wbsearchentities search API) — this is missing
+#    upstream data, not a bug in our candidate generation.
+#
+# Add an entry here only after confirming (not guessing) the live query
+# genuinely can't find the entity — check with wbgetentities first.
+manual_aliases:
+  - qid: Q1058
+    lang: hi
+    alias: "नरेंद्र मोदी"        # anusvara spelling; cached Wikidata label uses conjunct "नरेन्द्र मोदी"
+    label: "नरेन्द्र मोदी"
+    description: "वर्ष २०१४ से भारत के प्रधानमन्त्री"
+  - qid: Q1058
+    lang: hi
+    alias: "मोदी"
+    label: "नरेन्द्र मोदी"
+    description: "वर्ष २०१४ से भारत के प्रधानमन्त्री"
+  - qid: Q1058
+    lang: en
+    alias: "Modi"          # Wikidata has zero registered English aliases for Q1058
+    label: "Narendra Modi"
+    description: "Prime Minister of India since 2014"

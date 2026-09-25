@@ -1,0 +1,67 @@
+# Seed Wikidata QIDs used to build the local alias/description cache for
+# candidate generation. Expand this list over time (e.g. from WikiAnn gold
+# entities) — this set covers the project's worked disambiguation examples
+# plus a broader spread of common real-world entities (countries, capitals,
+# companies, organizations, world leaders) to reduce NIL false-negatives on
+# out-of-the-box demo queries.
+seed_qids:
+  # --- Disambiguation stress-tests (same name, different entity) ---
+  - Q312      # Apple Inc. (company)
+  - Q89       # apple (fruit)
+  - Q3884     # Amazon (company)
+  - Q3783     # Amazon River
+  - Q1247685  # Amazons (mythical warriors)
+  - Q2277     # Roman Empire
+
+  # --- People ---
+  - Q1058     # Narendra Modi
+  - Q567      # Angela Merkel
+  - Q317521   # Elon Musk
+  - Q76       # Barack Obama
+  - Q6279     # Joe Biden
+  - Q7747     # Vladimir Putin
+  - Q19310    # Xi Jinping
+  - Q937      # Albert Einstein
+  - Q11571    # Cristiano Ronaldo
+  - Q615      # Lionel Messi
+  - Q8023     # Nelson Mandela
+
+  # --- Countries ---
+  - Q668      # India
+  - Q183      # Germany
+  - Q29       # Spain
+  - Q142      # France
+  - Q159      # Russia
+  - Q30       # United States of America
+  - Q38       # Italy
+  - Q145      # United Kingdom
+  - Q148      # China
+  - Q17       # Japan
+  - Q16       # Canada
+  - Q155      # Brazil
+  - Q408       # Australia
+  - Q96       # Mexico
+  - Q79       # Egypt
+
+  # --- Cities ---
+  - Q64       # Berlin
+  - Q90       # Paris
+  - Q84       # London
+  - Q1490     # Tokyo
+  - Q60       # New York City
+  - Q649      # Moscow
+  - Q220      # Rome
+  - Q1355     # Bangalore
+
+  # --- Companies / organizations ---
+  - Q548114   # Target Corporation
+  - Q1065     # United Nations
+  - Q23548    # NASA
+  - Q2283     # Microsoft
+  - Q95       # Google
+  - Q478214   # Tesla, Inc.
+  - Q380      # Meta Platforms (Facebook)
+  - Q918      # Twitter / X
+  - Q193701   # SpaceX
+  - Q37156    # IBM
+  - Q483915   # Nike, Inc.
