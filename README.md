@@ -6,8 +6,7 @@ multilingual transformer embeddings for cross-lingual disambiguation — with a 
 its work: candidate rankings, disambiguation graphs, and the exact score arithmetic behind
 every linking decision.
 
-See [`docs/Multilingual_Entity_Linking_Proposal.docx`](docs/Multilingual_Entity_Linking_Proposal.docx)
-and [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md) for the full project write-up (background,
+See [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md) for the full project write-up (background,
 experiments, and findings behind the design decisions below).
 
 ---
