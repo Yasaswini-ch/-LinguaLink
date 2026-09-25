@@ -111,6 +111,8 @@ demo/
   frontend/     React app ("LinguaLink") — Vite + plain CSS, no UI framework dependency
 tests/          unit tests
 results/        evaluation output tables/plots (gitignored except .gitkeep)
+Dockerfile              backend-only image for Hugging Face Spaces deployment (see Deployment)
+requirements-backend.txt  runtime-only deps for the Docker image (excludes training/eval extras)
 ```
 
 ## Getting started
@@ -209,19 +211,36 @@ sentence-transformers alone exceed that), execution timeouts unsuited to model i
 no persistent process to keep a loaded model warm between invocations — every cold start would
 re-download and re-load the models from scratch.
 
-Deploy it instead to a platform that runs a persistent process, for example
-**Render**, **Railway**, **Fly.io**, or a plain VM:
+Deploy it instead to a platform that runs a persistent process with enough memory for two
+transformer models loaded at once (2 GB+ recommended).
+
+**Hugging Face Spaces (recommended, free CPU tier with 16 GB RAM)** — a `Dockerfile` at the
+repo root is already set up for this:
+
+1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space),
+   SDK = **Docker**, hardware = the free CPU Basic tier.
+2. Push this repo to the Space's git remote: `git remote add space <space-git-url>` then
+   `git push space main`. The Space builds `Dockerfile` (which installs the CPU-only torch
+   wheel and only the backend's runtime dependencies from `requirements-backend.txt`, then
+   runs `demo/backend/main.py` on port 7860, as Spaces expect).
+3. Set **`ALLOWED_ORIGINS`** as a Space secret/variable to your Vercel frontend's URL(s),
+   comma-separated.
+4. Your backend is now reachable at `https://<username>-<space-name>.hf.space`.
+
+**Render / Railway / Fly.io / a plain VM** — no Dockerfile needed, just:
 
 1. Start command: `uvicorn demo.backend.main:app --host 0.0.0.0 --port $PORT`
 2. Install dependencies from the repo root's `requirements.txt`.
 3. Set **`ALLOWED_ORIGINS`** to your Vercel frontend's URL(s), comma-separated
    (e.g. `https://your-app.vercel.app,https://your-app-git-main-yourname.vercel.app`).
-4. Optional but recommended: run `python scripts/build_kb_index.py --languages en hi es de`
-   as part of your build step. `data/kb/*` is gitignored, so a fresh deploy without this step
-   still works — every candidate lookup just falls back to the live Wikidata search API,
-   which is slower and subject to Wikidata's rate limits.
-5. Give it enough memory for the NER + sentence-embedding models (2 GB+ recommended); the
-   first request after a cold start will be slow while models download and load.
+
+Either way:
+
+- Optional but recommended: run `python scripts/build_kb_index.py --languages en hi es de`
+  before deploying and include `data/kb/wikidata_aliases.parquet` in the deploy. `data/kb/*`
+  is gitignored, so a fresh deploy without this step still works — every candidate lookup just
+  falls back to the live Wikidata search API, which is slower and subject to rate limits.
+- The first request after a cold start will be slow while models download and load.
 
 ## Known limitations
 

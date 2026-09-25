@@ -1,0 +1,18 @@
+# Runtime-only dependencies for demo/backend (excludes training/eval-only
+# packages like datasets, seqeval, faiss-cpu, scikit-learn, pytest, tqdm —
+# see requirements.txt for the full dev/training environment).
+# torch is installed separately in the Dockerfile via the CPU-only wheel
+# index, so it is intentionally NOT listed here.
+transformers>=4.40
+sentence-transformers>=2.7
+truecase>=0.0.14
+
+SPARQLWrapper>=2.0
+requests>=2.31
+
+pandas>=2.2
+numpy>=1.26
+pyyaml>=6.0
+
+fastapi>=0.111
+uvicorn[standard]>=0.29
