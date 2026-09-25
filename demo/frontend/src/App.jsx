@@ -13,6 +13,7 @@ import {
   IconInfo,
 } from "./icons.jsx";
 import { linkText, getRelations } from "./apiClient.js";
+import ScoresPanel from "./ScoresPanel.jsx";
 
 const CONFIDENCE_HINT =
   "This is the disambiguation confidence: cosine similarity between the mention's context and the " +
@@ -466,6 +467,7 @@ export default function App() {
   const [error, setError] = useState(null);
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [phase, setPhase] = useState(-1);
+  const [showScores, setShowScores] = useState(false);
 
   async function runQuery(queryText) {
     if (!queryText.trim()) return;
@@ -505,11 +507,16 @@ export default function App() {
           </div>
         </div>
         <div className="nav-links">
+          <button className="nav-link-btn" onClick={() => setShowScores(true)}>
+            Model Scores
+          </button>
           <a href="#">Docs</a>
           <a href="#">GitHub</a>
           <a href="#">About</a>
         </div>
       </nav>
+
+      {showScores && <ScoresPanel onClose={() => setShowScores(false)} />}
 
       <main className="container">
         <div className="hero-row">
@@ -724,15 +731,40 @@ export default function App() {
                     ) : (
                       <DisambiguationGraph mention={m} compact maxCandidates={5} />
                     )}
-                    <ScoreBreakdown
-                      mention={m}
-                      popularityWeight={result.popularity_weight}
-                      nilThreshold={result.nil_threshold}
-                    />
                   </div>
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {result && result.mentions.some((m) => m.candidates.length > 1) && (
+          <div className="card fade-in graphs-section">
+            <h2>
+              <IconPipeline /> Candidate score breakdown
+            </h2>
+            <p className="muted small">
+              A separate score table per mention, showing every candidate it was ranked against. blended = semantic +{" "}
+              {result.popularity_weight.toFixed(2)} × pop.&nbsp;norm; a mention is NIL when its top candidate's raw
+              semantic score is below {result.nil_threshold.toFixed(2)}.
+            </p>
+            {result.mentions.map((m, i) => {
+              if (m.candidates.length <= 1) return null;
+              const meta = labelMeta(m.label);
+              return (
+                <div key={i} className="score-breakdown-block">
+                  <div className="graph-instance-title">
+                    <span className={`type-badge type-${m.label}`}>{meta.name}</span>
+                    {m.is_nil ? m.text : m.entity_label}
+                  </div>
+                  <ScoreBreakdown
+                    mention={m}
+                    popularityWeight={result.popularity_weight}
+                    nilThreshold={result.nil_threshold}
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
 
