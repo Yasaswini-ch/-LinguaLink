@@ -5,10 +5,14 @@
 
 # Core ML
 torch>=2.1
-transformers>=4.40
-tiktoken>=0.7            # transformers' fast-tokenizer conversion path can require this
-                         # even for non-tiktoken models (observed on newer transformers
-                         # releases, e.g. Streamlit Cloud pulling a version we don't pin to)
+# Pinned exact, not >=: a newer transformers release (observed on Streamlit
+# Cloud's environment) has a tokenizer-loading bug that incorrectly routes
+# this (sentencepiece-based, non-tiktoken) XLM-R model through a tiktoken
+# conversion path and fails even with tiktoken installed. 5.17.0 is verified
+# working locally without needing tiktoken at all — pin to it rather than
+# chase tiktoken's availability on whatever Python version Cloud is running.
+transformers==5.17.0
+tiktoken>=0.7            # kept as a safety net in case some environment still needs it
 datasets>=2.19
 sentence-transformers>=2.7
 truecase>=0.0.14   # restores likely capitalization before NER (English only)
