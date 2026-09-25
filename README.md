@@ -107,11 +107,15 @@ notebooks/      exploratory analysis (Colab GPU training notebook)
 data/           raw/processed datasets and local knowledge-base cache (gitignored)
 models/         trained checkpoints (gitignored)
 demo/
-  backend/      FastAPI app (main.py)
-  frontend/     React app ("LinguaLink") — Vite + plain CSS, no UI framework dependency
+  backend/              FastAPI app (main.py) — Option B deployment
+  frontend/             React app ("LinguaLink") — Vite + plain CSS, no UI framework dependency;
+                        also the source for the Streamlit-embedded bundle (npm run build:streamlit)
+  streamlit_component/  Python wrapper + prebuilt frontend_dist/ for the Streamlit custom
+                        component — see streamlit_app.py (Option A deployment)
 tests/          unit tests
 results/        evaluation output tables/plots (gitignored except .gitkeep)
-Dockerfile              backend-only image for container deployment, e.g. Cloud Run (see Deployment)
+streamlit_app.py          Streamlit Community Cloud entrypoint (Option A — see Deployment)
+Dockerfile                backend-only image for container deployment, e.g. Cloud Run (Option B)
 requirements-backend.txt  runtime-only deps for the Docker image (excludes training/eval extras)
 ```
 
@@ -188,10 +192,43 @@ current numbers and honest caveats.
 
 ## Deployment
 
-The frontend and backend have very different hosting requirements, so **they deploy
-separately** — do not try to put both on Vercel.
+Two shapes are supported, depending on what you need.
 
-### Frontend → Vercel
+### Option A: Streamlit Community Cloud — one deploy, free, no card required
+
+`streamlit_app.py` (repo root) runs the entire pipeline **and** the React UI — embedded
+unchanged, via a Streamlit custom component (`demo/streamlit_component/`) — as a single
+self-contained app. No separate backend, no CORS config, no API base URL: the UI talks to
+Python directly through Streamlit's component bridge instead of HTTP. This is the only
+deployment path here that's genuinely free with no payment method required at all.
+
+1. Build and commit the embedded frontend bundle — **this step is required before every
+   deploy**, since Streamlit Community Cloud only runs `pip install -r requirements.txt` plus
+   the Python entrypoint; it does not run an `npm`/Node build step:
+   ```bash
+   cd demo/frontend
+   npm install
+   npm run build:streamlit
+   ```
+   This writes `demo/streamlit_component/frontend_dist/` — commit that output.
+2. Push to GitHub, go to [streamlit.io/cloud](https://streamlit.io/cloud) → **New app**, pick
+   this repo, set **Main file path** to `streamlit_app.py`.
+3. Deploy. No environment variables needed.
+
+**Honest caveat**: Community Cloud's free tier gives 1 GB RAM, and this app loads two
+transformer models (NER + sentence-embeddings) that can each approach that on their own in
+float32 — verified working locally (full RAM available), but not yet verified against
+Streamlit Cloud's actual memory quota. If it gets OOM-killed there, the fix is shrinking/
+quantizing the models (see `configs/linking.yaml` and `configs/ner_xlmr.yaml` for what's
+currently loaded), not a deployment setting.
+
+### Option B: Separate frontend (Vercel) + backend (elsewhere)
+
+Use this if you'd rather host the UI and API independently, or want the FastAPI JSON API
+callable on its own. The frontend and backend have very different hosting requirements here,
+so **they deploy separately** — do not try to put both on Vercel.
+
+#### Frontend → Vercel
 
 This is a good fit: it's a static Vite/React build with no server-side code.
 
@@ -202,7 +239,7 @@ This is a good fit: it's a static Vite/React build with no server-side code.
    build has no dev proxy and every API call will 404.
 3. Deploy. Vercel gives you a `https://<project>.vercel.app` URL (plus a per-PR preview URL).
 
-### Backend → NOT Vercel
+#### Backend → NOT Vercel
 
 The backend is a long-running FastAPI process that loads multi-hundred-MB PyTorch/Transformers
 models into memory and keeps them warm across requests. This doesn't fit Vercel's serverless

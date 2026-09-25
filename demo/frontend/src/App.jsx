@@ -12,11 +12,7 @@ import {
   IconPlay,
   IconInfo,
 } from "./icons.jsx";
-
-// In dev, Vite's proxy (vite.config.js) forwards "/api" to localhost:8000, so
-// the default here is enough. In production there is no such proxy — set
-// VITE_API_BASE_URL (e.g. to your deployed backend's URL) at build time.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+import { linkText, getRelations } from "./apiClient.js";
 
 const CONFIDENCE_HINT =
   "This is the disambiguation confidence: cosine similarity between the mention's context and the " +
@@ -302,8 +298,7 @@ function EntityDetails({ mention, lang }) {
     if (relationsQid === mention.qid) return; // already fetched for this entity
     setRelationsLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/entity/${mention.qid}/relations?lang=${lang}`);
-      const data = await res.json();
+      const data = await getRelations(mention.qid, lang);
       setRelations(data.relations);
       setCoordinates(data.coordinates);
       setRelationsQid(mention.qid);
@@ -484,13 +479,7 @@ export default function App() {
     }, 350);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/link`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lang, text: queryText }),
-      });
-      if (!res.ok) throw new Error(`API error: ${res.status}`);
-      const data = await res.json();
+      const data = await linkText(lang, queryText);
       setResult(data);
       if (data.mentions.length) setSelectedIdx(0);
       setPhase(4);

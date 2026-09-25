@@ -1,3 +1,8 @@
+# CPU-only PyTorch wheel index. Harmless as an extra index on any platform;
+# specifically avoids pulling the much larger default CUDA-bundled wheel on
+# Linux deployment targets (Streamlit Community Cloud, Docker, etc.).
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # Core ML
 torch>=2.1
 transformers>=4.40
@@ -20,9 +25,11 @@ pyyaml>=6.0
 faiss-cpu>=1.8; platform_system != "Windows"
 scikit-learn>=1.4        # fallback nearest-neighbor / TF-IDF baseline
 
-# Demo (backend API — frontend is a separate React app in demo/frontend)
+# Demo — either the FastAPI backend (frontend is a separate React app in
+# demo/frontend) or the self-contained Streamlit deployment (streamlit_app.py)
 fastapi>=0.111
 uvicorn[standard]>=0.29
+streamlit>=1.60
 
 # Dev / testing
 pytest>=8.2
