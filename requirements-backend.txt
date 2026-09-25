@@ -4,6 +4,8 @@
 # torch is installed separately in the Dockerfile via the CPU-only wheel
 # index, so it is intentionally NOT listed here.
 transformers>=4.40
+tiktoken>=0.7            # transformers' fast-tokenizer conversion path can require this
+                         # even for non-tiktoken models on some transformers releases
 sentence-transformers>=2.7
 truecase>=0.0.14
 
