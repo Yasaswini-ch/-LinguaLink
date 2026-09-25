@@ -1,7 +1,7 @@
 # Backend-only image for demo/backend (FastAPI + NER/linking pipeline).
-# Built for Hugging Face Spaces (Docker SDK), which expects the app to
-# listen on port 7860. See README.md's Deployment section for why this
-# runs here and not on Vercel (which hosts demo/frontend instead).
+# Portable across container platforms (Render, Fly.io, Google Cloud Run, a
+# plain VM, ...) — see README.md's Deployment section for why this runs here
+# and not on Vercel (which hosts demo/frontend instead).
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -18,6 +18,9 @@ COPY configs/ ./configs/
 COPY demo/backend/ ./demo/backend/
 
 ENV PYTHONUNBUFFERED=1
-EXPOSE 7860
+EXPOSE 8080
 
-CMD ["uvicorn", "demo.backend.main:app", "--host", "0.0.0.0", "--port", "7860"]
+# Most platforms (Cloud Run, Render, Railway, Fly.io) inject a $PORT env var
+# the container must listen on; 8080 is only the fallback for a plain
+# `docker run` with no PORT set.
+CMD ["sh", "-c", "uvicorn demo.backend.main:app --host 0.0.0.0 --port ${PORT:-8080}"]

@@ -111,7 +111,7 @@ demo/
   frontend/     React app ("LinguaLink") — Vite + plain CSS, no UI framework dependency
 tests/          unit tests
 results/        evaluation output tables/plots (gitignored except .gitkeep)
-Dockerfile              backend-only image for Hugging Face Spaces deployment (see Deployment)
+Dockerfile              backend-only image for container deployment, e.g. Cloud Run (see Deployment)
 requirements-backend.txt  runtime-only deps for the Docker image (excludes training/eval extras)
 ```
 
@@ -212,27 +212,31 @@ no persistent process to keep a loaded model warm between invocations — every 
 re-download and re-load the models from scratch.
 
 Deploy it instead to a platform that runs a persistent process with enough memory for two
-transformer models loaded at once (2 GB+ recommended).
+transformer models loaded at once (2 GB+ recommended). Note: as of 2026, Hugging Face Spaces
+requires a paid PRO plan to create a Docker or Gradio Space (even on free CPU hardware) — it's
+not a free option here despite older guidance suggesting otherwise.
 
-**Hugging Face Spaces (recommended, free CPU tier with 16 GB RAM)** — a `Dockerfile` at the
-repo root is already set up for this:
+**Google Cloud Run (recommended free option)** — genuinely free within a generous monthly quota,
+scales to zero when idle (no cost while unused), and runs the `Dockerfile` at the repo root
+as-is:
 
-1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space),
-   SDK = **Docker**, hardware = the free CPU Basic tier.
-2. Push this repo to the Space's git remote: `git remote add space <space-git-url>` then
-   `git push space main`. The Space builds `Dockerfile` (which installs the CPU-only torch
-   wheel and only the backend's runtime dependencies from `requirements-backend.txt`, then
-   runs `demo/backend/main.py` on port 7860, as Spaces expect).
-3. Set **`ALLOWED_ORIGINS`** as a Space secret/variable to your Vercel frontend's URL(s),
-   comma-separated.
-4. Your backend is now reachable at `https://<username>-<space-name>.hf.space`.
+1. Install the `gcloud` CLI, then from the repo root:
+   `gcloud run deploy lingualink-backend --source . --memory 2Gi --allow-unauthenticated`
+   (Cloud Run injects `$PORT` automatically — the Dockerfile already reads it.)
+2. Set **`ALLOWED_ORIGINS`** as an environment variable on the service to your Vercel
+   frontend's URL(s), comma-separated.
+3. Your backend is reachable at the `*.run.app` URL Cloud Run prints after deploy.
 
-**Render / Railway / Fly.io / a plain VM** — no Dockerfile needed, just:
+**Render / Railway / Fly.io / a plain VM** — also work with the same `Dockerfile`, or without
+one:
 
 1. Start command: `uvicorn demo.backend.main:app --host 0.0.0.0 --port $PORT`
-2. Install dependencies from the repo root's `requirements.txt`.
+2. Install dependencies from the repo root's `requirements.txt` (or `requirements-backend.txt`
+   for a lighter install).
 3. Set **`ALLOWED_ORIGINS`** to your Vercel frontend's URL(s), comma-separated
    (e.g. `https://your-app.vercel.app,https://your-app-git-main-yourname.vercel.app`).
+   Note: Render's free tier (512 MB RAM) is likely too small for two loaded transformer
+   models — expect to need at least a 2 GB paid instance there.
 
 Either way:
 
